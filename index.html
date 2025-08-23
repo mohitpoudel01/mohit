@@ -41,7 +41,7 @@
                 <div class="home__data">
                     <h1 class="home__title">Hi,<br>I'am <span class="home__title-color">Mohit</span><br> Youtuber</h1>
 
-                    <a href="#" class="button">Contact</a>
+                    <!-- <a href="#" class="button">Contact</a> -->
                 </div>
 
                 <div class="home__social">
@@ -74,10 +74,10 @@
                     
                     <div>
                         <h2 class="about__subtitle">I'am Mohit</h2>
-                        <p class="about__text">I make short youtube videos.Hi, I’m Mohit Poudel!
+                        <p class="about__text">I make short youtube videos. Hi, I’m Mohit Poudel!
                              My channel is 
                              <a href="https://www.youtube.com/@Mohitpoudel9123"><i class='bx bxl-youtube'></i> <b>Art M.P</b></a>
-                            .I’m 12 years old and I love making short videos on YouTube.
+                            .I’m 12 years old and I love making short videos on YouTube. <b>I also love sketching and drawing.</b>
                              I enjoy creating fun and creative content to share with everyone, and 
                              I’m always excited to try new ideas. Making videos is something I really enjoy, 
                             and I hope you like watching them as much as I enjoy making them.</p>           
@@ -155,15 +155,15 @@
 
                 <div class="work__container bd-grid">
                     <a href="" class="work__img">
-                        <img src="assets/img/work1.jpg" alt="">
+                        <img src="assets/img/work1.png" alt="">
                     </a>
                     <a href="" class="work__img">
-                        <img src="assets/img/work2.jpg" alt="">
+                        <img src="assets/img/work2.png" alt="">
                     </a>
                     <a href="" class="work__img">
-                        <img src="assets/img/work3.jpg" alt="">
+                        <img src="assets/img/work3.png" alt="">
                     </a>
-                    <a href="" class="work__img">
+                    <!-- <a href="" class="work__img">
                         <img src="assets/img/work4.jpg" alt="">
                     </a>
                     <a href="" class="work__img">
@@ -171,7 +171,7 @@
                     </a>
                     <a href="" class="work__img">
                         <img src="assets/img/work6.jpg" alt="">
-                    </a>
+                    </a> -->
                 </div>
             </section>
 
@@ -180,12 +180,19 @@
                 <h2 class="section-title">Contact</h2>
 
                 <div class="contact__container bd-grid">
-                    <form action="" class="contact__form">
-                        <input type="text" placeholder="Name" class="contact__input">
-                        <input type="mail" placeholder="Email" class="contact__input">
-                        <textarea name="" id="" cols="0" rows="10" class="contact__input"></textarea>
-                        <input type="button" value="Send" class="contact__button button">
-                    </form>
+                  <form id="contact-form" action="https://formspree.io/f/mnnzewze" method="POST" class="contact__form">
+  <input type="text" name="name" placeholder="Name" class="contact__input" required>
+  <input type="email" name="email" placeholder="Email" class="contact__input" required>
+  <textarea name="message" cols="0" rows="10" class="contact__input" required></textarea>
+  <button type="submit" class="contact__button button">Send</button>
+</form>
+
+<!-- Success message -->
+<p id="form-message" style="color:green; display:none; margin-top:10px;">
+  ✅ Message sent successfully!
+</p>
+
+
                 </div>
             </section>
         </main>
@@ -207,5 +214,33 @@
 
         <!--===== MAIN JS =====-->
         <script src="assets/js/main.js"></script>
+        <script>
+  const form = document.getElementById("contact-form");
+  const message = document.getElementById("form-message");
+
+  form.addEventListener("submit", async function(e) {
+    e.preventDefault(); // stop normal form submit
+
+    const formData = new FormData(form);
+
+    try {
+      const response = await fetch(form.action, {
+        method: form.method,
+        body: formData,
+        headers: { 'Accept': 'application/json' }
+      });
+
+      if (response.ok) {
+        message.style.display = "block";   // show success
+        form.reset();                      // clear inputs
+      } else {
+        alert("❌ Failed to send message. Try again!");
+      }
+    } catch (error) {
+      alert("⚠️ Error sending message.");
+    }
+  });
+</script>
+
     </body>
 </html>
