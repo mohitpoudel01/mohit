@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Number Guess Chat Game</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --font: 'Poppins', sans-serif;
+      --text: #222;
+      --blue: #007bff;
+      --grad-a: #6a11cb;
+      --grad-b: #2575fc;
+      --bg: #e8f0ff;
+    }
+
+    body {
+      margin: 0;
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--grad-a), var(--grad-b));
+      color: white;
+      padding: 16px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 20px;
+    }
+
+    .chat-box {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .msg {
+      max-width: 70%;
+      padding: 10px 14px;
+      border-radius: 16px;
+      font-size: 14px;
+      line-height: 1.4;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .bot {
+      background: white;
+      align-self: flex-start;
+      border: 1px solid #ddd;
+    }
+
+    .user {
+      background: var(--blue);
+      color: white;
+      align-self: flex-end;
+    }
+
+    .input-box {
+      display: flex;
+      padding: 12px;
+      border-top: 1px solid #ddd;
+      background: white;
+    }
+
+    .input-box input {
+      flex: 1;
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid #ccc;
+      font-family: var(--font);
+      font-size: 14px;
+    }
+
+    .input-box button {
+      margin-left: 8px;
+      background: var(--blue);
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+  </style>
+</head>
+<body>
+  <header>🎯 Number Guess Game</header>
+  <div class="chat-box" id="chat"></div>
+  <div class="input-box">
+    <input type="number" id="guessInput" placeholder="Enter your guess (1-100)" />
+    <button id="sendBtn">Send</button>
+  </div>
+
+  <script>
+    const chat = document.getElementById('chat');
+    const guessInput = document.getElementById('guessInput');
+    const sendBtn = document.getElementById('sendBtn');
+
+    let secret = Math.floor(Math.random() * 100) + 1;
+    let attempts = 0;
+
+    function addMessage(text, sender){
+      const div = document.createElement('div');
+      div.className = 'msg ' + sender;
+      div.textContent = text;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function resetGame(){
+      secret = Math.floor(Math.random() * 100) + 1;
+      attempts = 0;
+      addMessage("New game started! Guess a number between 1 and 100.", 'bot');
+    }
+
+    function handleGuess(){
+      const val = parseInt(guessInput.value);
+      if (isNaN(val)) return;
+      addMessage(val, 'user');
+      attempts++;
+
+      if (val === secret){
+        addMessage(`🎉 Correct! You guessed it in ${attempts} attempts.`, 'bot');
+        setTimeout(resetGame, 2000);
+      } else if (val < secret){
+        addMessage("Too low! Try again.", 'bot');
+      } else {
+        addMessage("Too high! Try again.", 'bot');
+      }
+      guessInput.value = '';
+      guessInput.focus();
+    }
+
+    sendBtn.addEventListener('click', handleGuess);
+    guessInput.addEventListener('keydown', e => { if (e.key === 'Enter') handleGuess(); });
+
+    // Start game
+    addMessage("I'm thinking of a number between 1 and 100. Can you guess it?", 'bot');
+  </script>
+</body>
+</html>

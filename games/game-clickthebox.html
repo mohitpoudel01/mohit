@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Click the Box Game</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: #fff;
+      color: #222;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: 15px;
+      font-weight: 700;
+      color: #222;
+    }
+
+    .highlight {
+      color: #007bff; /* blue accent */
+    }
+
+    .highlight-purple {
+      background: linear-gradient(90deg, #6a11cb, #2575fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 700;
+    }
+
+    .game-container {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+      max-width: 700px;
+      width: 90%;
+      padding: 25px;
+      text-align: center;
+    }
+
+    .game-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .game-area {
+      position: relative;
+      width: 100%;
+      height: 400px;
+      background: #e8f0ff; /* light blue */
+      border-radius: 15px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .start-btn, .restart-btn {
+      padding: 12px 30px;
+      background: #007bff;
+      color: white;
+      font-size: 1rem;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .start-btn:hover, .restart-btn:hover {
+      background: #0056b3;
+    }
+
+    /* Clickable box */
+    #box {
+      width: 50px;
+      height: 50px;
+      background: #6a11cb; /* purple accent */
+      border-radius: 10px;
+      position: absolute;
+      display: none;
+      cursor: pointer;
+    }
+
+    /* Game over overlay */
+    #gameOver {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255,255,255,0.9);
+      border-radius: 15px;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #333;
+    }
+
+    #finalScore {
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  a<h1><span class="highlight">Mohit</span></h1>
+
+  <div class="game-container">
+    <div class="game-header">
+      <div id="score">Score: 0</div>
+      <div id="time">Time: 30</div>
+    </div>
+
+    <div class="game-area" id="gameArea">
+      <div id="box"></div>
+      <div id="gameOver">
+        <div id="finalScore">Your Score: 0</div>
+        <button class="restart-btn" onclick="startGame()">Restart</button>
+      </div>
+    </div>
+
+    <button class="start-btn" onclick="startGame()">Start Game</button>
+  </div>
+
+  <script>
+    const box = document.getElementById("box");
+    const gameArea = document.getElementById("gameArea");
+    const scoreDisplay = document.getElementById("score");
+    const timeDisplay = document.getElementById("time");
+    const gameOverScreen = document.getElementById("gameOver");
+    const finalScore = document.getElementById("finalScore");
+
+    let score = 0;
+    let timeLeft = 30;
+    let gameInterval, timerInterval;
+
+    function moveBox() {
+      const areaWidth = gameArea.clientWidth - 50;
+      const areaHeight = gameArea.clientHeight - 50;
+
+      const randomX = Math.floor(Math.random() * areaWidth);
+      const randomY = Math.floor(Math.random() * areaHeight);
+
+      box.style.left = randomX + "px";
+      box.style.top = randomY + "px";
+      box.style.display = "block";
+    }
+
+    box.addEventListener("click", () => {
+      score++;
+      scoreDisplay.textContent = "Score: " + score;
+      moveBox();
+    });
+
+    function startGame() {
+      score = 0;
+      timeLeft = 30;
+      scoreDisplay.textContent = "Score: 0";
+      timeDisplay.textContent = "Time: 30";
+      box.style.display = "block";
+      gameOverScreen.style.display = "none";
+
+      moveBox();
+
+      clearInterval(gameInterval);
+      clearInterval(timerInterval);
+
+      gameInterval = setInterval(moveBox, 1200);
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        timeDisplay.textContent = "Time: " + timeLeft;
+
+        if (timeLeft <= 0) {
+          clearInterval(gameInterval);
+          clearInterval(timerInterval);
+          box.style.display = "none";
+          finalScore.textContent = "Your Score: " + score;
+          gameOverScreen.style.display = "flex";
+        }
+      }, 1000);
+    }
+  </script>
+</body>
+</html>
