@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Catch the Falling Objects - Fixed</title>
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: linear-gradient(to bottom, #6dd5fa, #ffffff);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+
+    #game {
+        position: relative;
+        width: 90vw;
+        max-width: 500px;
+        height: 70vh;
+        background-color: #e0f7fa;
+        border: 3px solid #333;
+        overflow: hidden;
+        border-radius: 10px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+
+    #basket {
+        position: absolute;
+        bottom: 10px;
+        width: 80px;
+        height: 25px;
+        background-color: #ff4500;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    }
+
+    .falling {
+        position: absolute;
+        top: -25px;
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+
+    .gold { background-color: gold; }
+    .bomb { background-color: black; }
+
+    #info {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #333;
+    }
+
+    @media (max-width: 500px) {
+        #basket { width: 60px; height: 20px; }
+        .falling { width: 20px; height: 20px; }
+    }
+</style>
+</head>
+<body>
+<div id="game">
+    <div id="info">Score: 0 | Level: 1</div>
+    <div id="basket"></div>
+</div>
+
+<script>
+const basket = document.getElementById('basket');
+const game = document.getElementById('game');
+const info = document.getElementById('info');
+
+let score = 0;
+let level = 1;
+let speedMultiplier = 1;
+
+// Set initial basket position
+let basketX = (game.offsetWidth - basket.offsetWidth) / 2;
+basket.style.left = basketX + 'px';
+
+function updateInfo() {
+    info.textContent = `Score: ${score} | Level: ${level}`;
+}
+
+// Basket movement for mouse
+game.addEventListener('mousemove', (e) => {
+    const rect = game.getBoundingClientRect();
+    let x = e.clientX - rect.left - basket.offsetWidth / 2;
+
+    // Clamp to edges
+    if (x < 0) x = 0;
+    if (x > game.offsetWidth - basket.offsetWidth) x = game.offsetWidth - basket.offsetWidth;
+
+    basket.style.left = x + 'px';
+});
+
+// Basket movement for touch
+game.addEventListener('touchmove', (e) => {
+    const rect = game.getBoundingClientRect();
+    let x = e.touches[0].clientX - rect.left - basket.offsetWidth / 2;
+
+    // Clamp to edges
+    if (x < 0) x = 0;
+    if (x > game.offsetWidth - basket.offsetWidth) x = game.offsetWidth - basket.offsetWidth;
+
+    basket.style.left = x + 'px';
+});
+
+// Create falling objects
+function createFallingObject() {
+    const obj = document.createElement('div');
+    obj.classList.add('falling');
+
+    // Random type: 80% gold, 20% bomb
+    if (Math.random() < 0.2) obj.classList.add('bomb');
+    else obj.classList.add('gold');
+
+    obj.style.left = Math.random() * (game.offsetWidth - obj.offsetWidth) + 'px';
+    game.appendChild(obj);
+
+    let objY = -obj.offsetHeight;
+    let speed = (2 + Math.random() * 2) * speedMultiplier;
+
+    function fall() {
+        objY += speed;
+        obj.style.top = objY + 'px';
+
+        const basketRect = basket.getBoundingClientRect();
+        const objRect = obj.getBoundingClientRect();
+
+        // Collision detection
+        if (!(objRect.bottom < basketRect.top ||
+              objRect.top > basketRect.bottom ||
+              objRect.right < basketRect.left ||
+              objRect.left > basketRect.right)) {
+
+            if (obj.classList.contains('gold')) {
+                score++;
+                if (score % 5 === 0) { 
+                    level++; 
+                    speedMultiplier += 0.2; 
+                }
+            } else {
+                alert(`Game Over! Final Score: ${score}`);
+                window.location.reload();
+            }
+
+            updateInfo();
+            obj.remove();
+            return;
+        }
+
+        if (objY > game.offsetHeight) { obj.remove(); return; }
+
+        requestAnimationFrame(fall);
+    }
+
+    requestAnimationFrame(fall);
+}
+
+// Create objects continuously
+setInterval(createFallingObject, 800 / speedMultiplier);
+updateInfo();
+</script>
+</body>
+</html>

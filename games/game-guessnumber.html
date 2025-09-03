@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Number Guess Chat Game</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
@@ -15,41 +15,66 @@
       --bg: #e8f0ff;
     }
 
-    body {
+    * {
+      box-sizing: border-box;
       margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
       font-family: var(--font);
       background: var(--bg);
       color: var(--text);
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
     }
 
-    header {
+    .game-container {
+      height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      grid-template-areas: 
+        "header"
+        "chat"
+        "input";
+    }
+
+    .header {
+      grid-area: header;
       background: linear-gradient(135deg, var(--grad-a), var(--grad-b));
       color: white;
-      padding: 16px;
+      padding: 15px;
       text-align: center;
       font-weight: 700;
-      font-size: 20px;
+      font-size: clamp(16px, 4vw, 20px);
     }
 
-    .chat-box {
-      flex: 1;
-      padding: 16px;
+    .chat-area {
+      grid-area: chat;
       overflow-y: auto;
+      padding: 10px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      justify-content: flex-end;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .messages {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-height: min-content;
     }
 
     .msg {
-      max-width: 70%;
+      max-width: 85%;
       padding: 10px 14px;
       border-radius: 16px;
       font-size: 14px;
       line-height: 1.4;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      word-wrap: break-word;
+      flex-shrink: 0;
     }
 
     .bot {
@@ -64,45 +89,113 @@
       align-self: flex-end;
     }
 
-    .input-box {
+    .input-area {
+      grid-area: input;
+      background: white;
+      border-top: 2px solid #ddd;
+      padding: 15px;
       display: flex;
-      padding: 12px;
-      border-top: 1px solid #ddd;
+      gap: 10px;
+      min-height: 70px;
+    }
+
+    .input-area input {
+      flex: 1;
+      padding: 15px;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      font-size: 16px;
+      font-family: var(--font);
+      outline: none;
       background: white;
     }
 
-    .input-box input {
-      flex: 1;
-      padding: 10px;
-      border-radius: 12px;
-      border: 1px solid #ccc;
-      font-family: var(--font);
-      font-size: 14px;
+    .input-area input:focus {
+      border-color: var(--blue);
     }
 
-    .input-box button {
-      margin-left: 8px;
+    .input-area button {
       background: var(--blue);
       color: white;
       border: none;
-      padding: 10px 16px;
-      border-radius: 12px;
-      cursor: pointer;
+      padding: 15px 20px;
+      border-radius: 10px;
+      font-size: 16px;
       font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .input-area button:active {
+      background: #0056b3;
+    }
+
+    /* Ensure input area is always visible */
+    @media (max-width: 768px) {
+      .game-container {
+        height: 100vh;
+        height: 100dvh;
+      }
+      
+      .input-area {
+        padding: 12px;
+        min-height: 60px;
+        border-top: 3px solid #007bff;
+        background: #f8f9fa;
+      }
+      
+      .input-area input {
+        padding: 12px;
+        font-size: 16px;
+        border-width: 2px;
+      }
+      
+      .input-area button {
+        padding: 12px 16px;
+        font-size: 14px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .msg {
+        max-width: 95%;
+        padding: 8px 12px;
+        font-size: 13px;
+      }
+      
+      .input-area {
+        padding: 10px;
+        min-height: 55px;
+      }
+      
+      .input-area input {
+        padding: 10px;
+      }
+      
+      .input-area button {
+        padding: 10px 14px;
+      }
     }
 
   </style>
 </head>
 <body>
-  <header>🎯 Number Guess Game</header>
-  <div class="chat-box" id="chat"></div>
-  <div class="input-box">
-    <input type="number" id="guessInput" placeholder="Enter your guess (1-100)" />
-    <button id="sendBtn">Send</button>
+  <div class="game-container">
+    <div class="header">Number Guess</div>
+    
+    <div class="chat-area" id="chatArea">
+      <div class="messages" id="messages"></div>
+    </div>
+    
+    <div class="input-area">
+      <input type="number" id="guessInput" placeholder="Enter your guess (1-100)" min="1" max="100" />
+      <button id="sendBtn">Send</button>
+    </div>
   </div>
 
   <script>
-    const chat = document.getElementById('chat');
+    const chatArea = document.getElementById('chatArea');
+    const messages = document.getElementById('messages');
     const guessInput = document.getElementById('guessInput');
     const sendBtn = document.getElementById('sendBtn');
 
@@ -113,8 +206,12 @@
       const div = document.createElement('div');
       div.className = 'msg ' + sender;
       div.textContent = text;
-      chat.appendChild(div);
-      chat.scrollTop = chat.scrollHeight;
+      messages.appendChild(div);
+      
+      // Scroll to show new message
+      setTimeout(() => {
+        div.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 100);
     }
 
     function resetGame(){
@@ -125,24 +222,33 @@
 
     function handleGuess(){
       const val = parseInt(guessInput.value);
-      if (isNaN(val)) return;
-      addMessage(val, 'user');
+      if (isNaN(val) || val < 1 || val > 100) {
+        addMessage("Please enter a valid number between 1 and 100.", 'bot');
+        guessInput.value = '';
+        return;
+      }
+      
+      addMessage(val.toString(), 'user');
       attempts++;
+      guessInput.value = '';
 
       if (val === secret){
-        addMessage(`🎉 Correct! You guessed it in ${attempts} attempts.`, 'bot');
+        addMessage(`🎉 Correct! You guessed it in ${attempts} attempt${attempts === 1 ? '' : 's'}.`, 'bot');
         setTimeout(resetGame, 2000);
       } else if (val < secret){
         addMessage("Too low! Try again.", 'bot');
       } else {
         addMessage("Too high! Try again.", 'bot');
       }
-      guessInput.value = '';
-      guessInput.focus();
     }
 
     sendBtn.addEventListener('click', handleGuess);
-    guessInput.addEventListener('keydown', e => { if (e.key === 'Enter') handleGuess(); });
+    guessInput.addEventListener('keydown', e => { 
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleGuess();
+      }
+    });
 
     // Start game
     addMessage("I'm thinking of a number between 1 and 100. Can you guess it?", 'bot');
