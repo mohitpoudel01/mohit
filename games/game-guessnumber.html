@@ -32,6 +32,7 @@
       text-align: center;
       font-weight: 700;
       font-size: 20px;
+      flex-shrink: 0;
     }
 
     .chat-box {
@@ -41,6 +42,9 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
+      box-sizing: border-box;
+      min-height: 0;
+      scroll-behavior: smooth;
     }
 
     .msg {
@@ -50,6 +54,7 @@
       font-size: 14px;
       line-height: 1.4;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      word-wrap: break-word;
     }
 
     .bot {
@@ -69,6 +74,7 @@
       padding: 12px;
       border-top: 1px solid #ddd;
       background: white;
+      flex-shrink: 0;
     }
 
     .input-box input {
@@ -90,13 +96,12 @@
       cursor: pointer;
       font-weight: 600;
     }
-
   </style>
 </head>
 <body>
-  <header>🎯 Number Guess Game</header>
+  <header>Number Guess</header>
   <div class="chat-box" id="chat"></div>
-  <div class="input-box">
+  <div class="input-box" id="inputBox">
     <input type="number" id="guessInput" placeholder="Enter your guess (1-100)" />
     <button id="sendBtn">Send</button>
   </div>
@@ -105,6 +110,7 @@
     const chat = document.getElementById('chat');
     const guessInput = document.getElementById('guessInput');
     const sendBtn = document.getElementById('sendBtn');
+    const inputBox = document.getElementById('inputBox');
 
     let secret = Math.floor(Math.random() * 100) + 1;
     let attempts = 0;
@@ -114,7 +120,7 @@
       div.className = 'msg ' + sender;
       div.textContent = text;
       chat.appendChild(div);
-      chat.scrollTop = chat.scrollHeight;
+      chat.scrollTop = chat.scrollHeight; // auto-scroll
     }
 
     function resetGame(){
@@ -143,6 +149,14 @@
 
     sendBtn.addEventListener('click', handleGuess);
     guessInput.addEventListener('keydown', e => { if (e.key === 'Enter') handleGuess(); });
+
+    // Mobile fix: when focusing input, keep it visible above keyboard
+    guessInput.addEventListener('focus', () => {
+      setTimeout(() => {
+        inputBox.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        chat.scrollTop = chat.scrollHeight;
+      }, 300);
+    });
 
     // Start game
     addMessage("I'm thinking of a number between 1 and 100. Can you guess it?", 'bot');
