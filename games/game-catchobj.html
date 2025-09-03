@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Catch the Falling Objects - Fixed</title>
+<title>Catch the Falling Objects - With Restart</title>
 <style>
     body {
         margin: 0;
@@ -13,10 +13,8 @@
         justify-content: center;
         align-items: center;
         height: 100vh;
-        overflow: hidden; /* prevents scrolling */
-        touch-action: none; /* prevents touch scrolling on mobile */
-
-
+        overflow: hidden;      
+        touch-action: none;    
     }
 
     #game {
@@ -62,15 +60,35 @@
         color: #333;
     }
 
+    #restartBtn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        padding: 8px 12px;
+        font-size: 1rem;
+        background-color: #ff4500;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        box-shadow: 0 3px 5px rgba(0,0,0,0.3);
+    }
+
+    #restartBtn:hover {
+        background-color: #e03e00;
+    }
+
     @media (max-width: 500px) {
         #basket { width: 60px; height: 20px; }
         .falling { width: 20px; height: 20px; }
+        #restartBtn { padding: 6px 10px; font-size: 0.9rem; }
     }
 </style>
 </head>
 <body>
 <div id="game">
     <div id="info">Score: 0 | Level: 1</div>
+    <button id="restartBtn">Restart</button>
     <div id="basket"></div>
 </div>
 
@@ -78,10 +96,13 @@
 const basket = document.getElementById('basket');
 const game = document.getElementById('game');
 const info = document.getElementById('info');
+const restartBtn = document.getElementById('restartBtn');
 
 let score = 0;
 let level = 1;
 let speedMultiplier = 1;
+let fallingObjects = [];
+let gameInterval;
 
 // Set initial basket position
 let basketX = (game.offsetWidth - basket.offsetWidth) / 2;
@@ -91,41 +112,32 @@ function updateInfo() {
     info.textContent = `Score: ${score} | Level: ${level}`;
 }
 
-// Basket movement for mouse
+// Basket movement
+function moveBasket(x) {
+    if (x < 0) x = 0;
+    if (x > game.offsetWidth - basket.offsetWidth) x = game.offsetWidth - basket.offsetWidth;
+    basket.style.left = x + 'px';
+}
+
 game.addEventListener('mousemove', (e) => {
     const rect = game.getBoundingClientRect();
-    let x = e.clientX - rect.left - basket.offsetWidth / 2;
-
-    // Clamp to edges
-    if (x < 0) x = 0;
-    if (x > game.offsetWidth - basket.offsetWidth) x = game.offsetWidth - basket.offsetWidth;
-
-    basket.style.left = x + 'px';
+    moveBasket(e.clientX - rect.left - basket.offsetWidth / 2);
 });
 
-// Basket movement for touch
 game.addEventListener('touchmove', (e) => {
     const rect = game.getBoundingClientRect();
-    let x = e.touches[0].clientX - rect.left - basket.offsetWidth / 2;
-
-    // Clamp to edges
-    if (x < 0) x = 0;
-    if (x > game.offsetWidth - basket.offsetWidth) x = game.offsetWidth - basket.offsetWidth;
-
-    basket.style.left = x + 'px';
+    moveBasket(e.touches[0].clientX - rect.left - basket.offsetWidth / 2);
 });
 
-// Create falling objects
+// Create falling object
 function createFallingObject() {
     const obj = document.createElement('div');
     obj.classList.add('falling');
-
-    // Random type: 80% gold, 20% bomb
-    if (Math.random() < 0.2) obj.classList.add('bomb');
-    else obj.classList.add('gold');
+    obj.classList.add(Math.random() < 0.2 ? 'bomb' : 'gold');
 
     obj.style.left = Math.random() * (game.offsetWidth - obj.offsetWidth) + 'px';
     game.appendChild(obj);
+    fallingObjects.push(obj);
 
     let objY = -obj.offsetHeight;
     let speed = (2 + Math.random() * 2) * speedMultiplier;
@@ -137,7 +149,7 @@ function createFallingObject() {
         const basketRect = basket.getBoundingClientRect();
         const objRect = obj.getBoundingClientRect();
 
-        // Collision detection
+        // Collision
         if (!(objRect.bottom < basketRect.top ||
               objRect.top > basketRect.bottom ||
               objRect.right < basketRect.left ||
@@ -150,16 +162,21 @@ function createFallingObject() {
                     speedMultiplier += 0.2; 
                 }
             } else {
-                alert(`Game Over! Final Score: ${score}`);
-                window.location.reload();
+                endGame();
+                return;
             }
 
             updateInfo();
             obj.remove();
+            fallingObjects = fallingObjects.filter(o => o !== obj);
             return;
         }
 
-        if (objY > game.offsetHeight) { obj.remove(); return; }
+        if (objY > game.offsetHeight) { 
+            obj.remove(); 
+            fallingObjects = fallingObjects.filter(o => o !== obj);
+            return; 
+        }
 
         requestAnimationFrame(fall);
     }
@@ -167,9 +184,31 @@ function createFallingObject() {
     requestAnimationFrame(fall);
 }
 
-// Create objects continuously
-setInterval(createFallingObject, 800 / speedMultiplier);
-updateInfo();
+// Start game
+function startGame() {
+    score = 0;
+    level = 1;
+    speedMultiplier = 1;
+    fallingObjects.forEach(obj => obj.remove());
+    fallingObjects = [];
+    updateInfo();
+    gameInterval = setInterval(createFallingObject, 800 / speedMultiplier);
+}
+
+// End game
+function endGame() {
+    clearInterval(gameInterval);
+    alert(`Game Over! Final Score: ${score}`);
+}
+
+// Restart button
+restartBtn.addEventListener('click', () => {
+    clearInterval(gameInterval);
+    startGame();
+});
+
+// Start automatically
+startGame();
 </script>
 </body>
 </html>
